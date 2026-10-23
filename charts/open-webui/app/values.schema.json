@@ -25,7 +25,7 @@
           "properties": {"caConfigMapName": {"type": "string"}, "caKey": {"type": "string", "minLength": 1}}
         },
         "documentAttachments": {"$ref": "#/definitions/unconfigured"},
-        "mcp": {"$ref": "#/definitions/unconfigured"},
+        "mcp": {"$ref": "#/definitions/mcp"},
         "costs": {"$ref": "#/definitions/unconfigured"},
         "rag": {"$ref": "#/definitions/unconfigured"},
         "codeInterpreter": {"$ref": "#/definitions/unconfigured"},
@@ -39,6 +39,16 @@
     "publicCertificates": {"type": "object", "properties": {"useProduction": {"type": "boolean"}}}
   },
   "definitions": {
+    "mcp": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "servers": {"type": "array", "maxItems": 200, "uniqueItems": true, "items": {"type": "string", "maxLength": 48, "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"}}
+      },
+      "if": {"properties": {"enabled": {"const": true}}, "required": ["enabled"]},
+      "then": {"required": ["servers"], "properties": {"servers": {"minItems": 1}}}
+    },
     "unconfigured": {"type": "object", "properties": {"enabled": {"const": false}}}
   }
 }

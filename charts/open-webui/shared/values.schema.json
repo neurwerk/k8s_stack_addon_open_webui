@@ -15,7 +15,7 @@
           }
         },
         "documentAttachments": {"$ref": "#/definitions/unconfigured"},
-        "mcp": {"$ref": "#/definitions/unconfigured"},
+        "mcp": {"$ref": "#/definitions/mcp"},
         "costs": {"$ref": "#/definitions/unconfigured"},
         "rag": {"$ref": "#/definitions/unconfigured"},
         "codeInterpreter": {"$ref": "#/definitions/unconfigured"},
@@ -35,13 +35,37 @@
     "frontendOpenWebuiSecrets": {"type": "object"},
     "openrouterCatalog": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "models": {"type": "array"}, "excludedModels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}}},
     "self-hosted-api-providers": {"type": "array"},
-    "external-api-providers": {"type": "array"}
+    "external-api-providers": {"type": "array"},
+    "mcp-servers": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "contextforgeRoutesEnabled": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "catalog": {
+          "type": "object",
+          "properties": {
+            "presets": {"type": "object", "additionalProperties": {"type": "object", "required": ["enabled"], "properties": {"enabled": {"type": "boolean"}, "displayName": {"type": "string", "maxLength": 128}}}},
+            "custom": {"type": "array", "items": {"type": "object", "required": ["enabled", "name"], "properties": {"enabled": {"type": "boolean"}, "name": {"type": "string"}, "displayName": {"type": "string", "maxLength": 128}}}}
+          }
+        }
+      }
+    }
   },
   "allOf": [{
     "if": {"properties": {"frontendOpenWebui": {"properties": {"enabled": {"const": true}}, "required": ["enabled"]}}, "required": ["frontendOpenWebui"]},
     "then": {"properties": {"authKeycloak": {"properties": {"hostname": {"minLength": 1, "pattern": "^[a-z0-9.-]+$"}}}}}
   }],
   "definitions": {
+    "mcp": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "servers": {"type": "array", "maxItems": 200, "uniqueItems": true, "items": {"type": "string", "maxLength": 48, "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$"}}
+      },
+      "if": {"properties": {"enabled": {"const": true}}, "required": ["enabled"]},
+      "then": {"required": ["servers"], "properties": {"servers": {"minItems": 1}}}
+    },
     "unconfigured": {"type": "object", "properties": {"enabled": {"const": false}}}
   }
 }
