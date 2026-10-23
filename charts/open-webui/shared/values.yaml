@@ -1,0 +1,26 @@
+frontendOpenWebui:
+  enabled: false
+  hostname: ""
+  agentGateway:
+    origin: http://infra-agentgateway-gateway.infra-agentgateway.svc.cluster.local:8082
+    defaultModel: ""
+  documentAttachments: {enabled: false}
+  mcp: {enabled: false}
+  costs: {enabled: false}
+  rag: {enabled: false}
+  codeInterpreter: {enabled: false}
+  directConnections: {enabled: false}
+authKeycloak:
+  hostname: ""
+  realm: neurwerk
+  openwebuiClientId: open-webui
+frontendOpenWebuiSecrets: {}
+openrouterCatalog:
+  enabled: false
+  models: []
+  excludedModels: []
+guardrails:
+  llmPolicyEngine:
+    models: []
+self-hosted-api-providers: []
+external-api-providers: []

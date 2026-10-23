@@ -1,0 +1,5 @@
+frontendOpenWebui:
+  agentGateway:
+    origin: http://infra-agentgateway-gateway.infra-agentgateway.svc.cluster.local:8082
+canonicalEndpointRouting:
+  mode: internal-traefik

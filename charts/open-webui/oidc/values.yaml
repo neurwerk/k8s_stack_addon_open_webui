@@ -1,0 +1,8 @@
+frontendOpenWebui:
+  enabled: false
+  hostname: ""
+authKeycloak:
+  openwebuiClientId: open-webui
+  openwebuiRedirectUri: ""
+  openwebuiWebOrigin: ""
+  agentgatewayClientRoles: []

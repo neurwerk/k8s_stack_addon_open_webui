@@ -1,0 +1,25 @@
+{{- if and .Values.frontendOpenWebui.enabled .Values.externalGateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: frontend-open-webui-gateway
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "open-webui.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ ternary "letsencrypt-production-cluster-issuer" "letsencrypt-staging-cluster-issuer" .Values.publicCertificates.useProduction }}
+    cert-manager.io/duration: "2160h"
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: websecure
+      port: {{ .Values.externalGateway.port }}
+      protocol: HTTPS
+      hostname: {{ required "frontendOpenWebui.hostname is required" .Values.frontendOpenWebui.hostname | quote }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - {name: frontend-open-webui-tls, kind: Secret, group: ""}
+      allowedRoutes:
+        namespaces: {from: Same}
+{{- end }}

@@ -1,0 +1,105 @@
+{{- if .Values.frontendOpenWebui.enabled }}
+{{- $connections := include "open-webui.modelConnections" . | fromYaml }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-open-webui-config-map
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: frontend-open-webui-shared
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: frontend-open-webui
+    reconcile.fluxcd.io/watch: Enabled
+data:
+  WEBUI_URL: {{ printf "https://%s" .Values.frontendOpenWebui.hostname | quote }}
+  ENABLE_PERSISTENT_CONFIG: "False"
+  ENABLE_OAUTH_PERSISTENT_CONFIG: "False"
+  WEBUI_AUTH: "True"
+  ENABLE_LOGIN_FORM: "False"
+  ENABLE_PASSWORD_AUTH: "False"
+  ENABLE_SIGNUP: "False"
+  ENABLE_OAUTH: "True"
+  ENABLE_OAUTH_SIGNUP: "True"
+  ENABLE_OAUTH_TOKEN_EXCHANGE: "False"
+  ENABLE_OAUTH_ID_TOKEN_COOKIE: "False"
+  ENABLE_OAUTH_ROLE_MANAGEMENT: "True"
+  ENABLE_OAUTH_GROUP_MANAGEMENT: "False"
+  ENABLE_OAUTH_EMAIL_FALLBACK: "False"
+  OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "False"
+  DEFAULT_USER_ROLE: pending
+  OAUTH_ALLOWED_ROLES: open-webui-user,open-webui-admin
+  OAUTH_ADMIN_ROLES: open-webui-admin
+  OAUTH_ROLES_CLAIM: realm_access.roles
+  OAUTH_SCOPES: openid email profile
+  OAUTH_PROVIDER_NAME: Keycloak
+  OAUTH_CLIENT_ID: {{ .Values.authKeycloak.openwebuiClientId | quote }}
+  OAUTH_CODE_CHALLENGE_METHOD: S256
+  OAUTH_TOKEN_ENDPOINT_AUTH_METHOD: client_secret_basic
+  OPENID_PROVIDER_URL: {{ printf "https://%s/realms/%s/.well-known/openid-configuration" .Values.authKeycloak.hostname .Values.authKeycloak.realm | quote }}
+  OPENID_REDIRECT_URI: {{ printf "https://%s/oauth/oidc/callback" .Values.frontendOpenWebui.hostname | quote }}
+  WEBUI_SESSION_COOKIE_SECURE: "True"
+  WEBUI_SESSION_COOKIE_SAME_SITE: lax
+  CORS_ALLOW_ORIGIN: {{ printf "https://%s" .Values.frontendOpenWebui.hostname | quote }}
+  DATABASE_TYPE: postgresql
+  DATABASE_HOST: postgres-operations.infra-postgres-operations.svc.cluster.local
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: openwebui
+  DATABASE_USER: openwebui
+  DATABASE_POOL_SIZE: "5"
+  DATABASE_POOL_MAX_OVERFLOW: "5"
+  ENABLE_OPENAI_API: "True"
+  OPENAI_API_BASE_URLS: {{ $connections.urls | quote }}
+  OPENAI_API_KEYS: {{ $connections.keys | quote }}
+  OPENAI_API_CONFIGS: {{ $connections.configs | toJson | quote }}
+  DEFAULT_MODELS: {{ .Values.frontendOpenWebui.agentGateway.defaultModel | quote }}
+  ENABLE_OLLAMA_API: "False"
+  ENABLE_OPENAI_API_PASSTHROUGH: "False"
+  ENABLE_DIRECT_CONNECTIONS: "False"
+  ENABLE_DIRECT_INTEGRATIONS: "False"
+  TOOL_SERVER_CONNECTIONS: "[]"
+  TERMINAL_SERVER_CONNECTIONS: "[]"
+  ENABLE_CODE_EXECUTION: "False"
+  ENABLE_CODE_INTERPRETER: "False"
+  ENABLE_WEB_SEARCH: "False"
+  ENABLE_IMAGE_GENERATION: "False"
+  ENABLE_IMAGE_EDIT: "False"
+  ENABLE_API_KEYS: "False"
+  ENABLE_MEMORIES: "False"
+  ENABLE_AUTOMATIONS: "False"
+  ENABLE_SUBAGENTS: "False"
+  ENABLE_CALENDAR: "False"
+  ENABLE_CHANNELS: "False"
+  ENABLE_NOTES: "False"
+  ENABLE_COMMUNITY_SHARING: "False"
+  ENABLE_VERSION_UPDATE_CHECK: "False"
+  ENABLE_FORWARD_USER_INFO_HEADERS: "False"
+  OFFLINE_MODE: "True"
+  HF_HUB_OFFLINE: "1"
+  RAG_EMBEDDING_MODEL_AUTO_UPDATE: "False"
+  RAG_RERANKING_MODEL_AUTO_UPDATE: "False"
+  WHISPER_MODEL_AUTO_UPDATE: "False"
+  RAG_EMBEDDING_ENGINE: openai
+  RAG_OPENAI_API_BASE_URL: http://127.0.0.1:9
+  RAG_OPENAI_API_KEY: ""
+  AUDIO_STT_ENGINE: openai
+  AUDIO_STT_OPENAI_API_BASE_URL: http://127.0.0.1:9
+  AUDIO_TTS_ENGINE: ""
+  USER_PERMISSIONS_CHAT_FILE_UPLOAD: "False"
+  USER_PERMISSIONS_CHAT_WEB_UPLOAD: "False"
+  USER_PERMISSIONS_CHAT_STT: "False"
+  USER_PERMISSIONS_CHAT_TTS: "False"
+  USER_PERMISSIONS_CHAT_CALL: "False"
+  USER_PERMISSIONS_CHAT_SHARE: "False"
+  USER_PERMISSIONS_CHAT_IMPORT: "False"
+  USER_PERMISSIONS_WORKSPACE_MODELS_ACCESS: "False"
+  USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ACCESS: "False"
+  USER_PERMISSIONS_WORKSPACE_TOOLS_ACCESS: "False"
+  USER_PERMISSIONS_WORKSPACE_SKILLS_ACCESS: "False"
+  USER_PERMISSIONS_FEATURES_DIRECT_TOOL_SERVERS: "False"
+  USER_PERMISSIONS_FEATURES_WEB_SEARCH: "False"
+  USER_PERMISSIONS_FEATURES_IMAGE_GENERATION: "False"
+  USER_PERMISSIONS_FEATURES_CODE_INTERPRETER: "False"
+  USER_PERMISSIONS_FEATURES_API_KEYS: "False"
+  USER_PERMISSIONS_FEATURES_MEMORIES: "False"
+  USER_PERMISSIONS_FEATURES_AUTOMATIONS: "False"
+{{- end }}

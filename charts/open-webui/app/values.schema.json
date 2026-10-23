@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "frontendOpenWebui": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "hostname": {"type": "string"},
+        "app": {
+          "type": "object",
+          "properties": {
+            "replicas": {"const": 1},
+            "image": {"const": "ghcr.io/open-webui/open-webui:v0.12.3@sha256:a537bbe1e6b428820f52ed4a029d7fff97062e24d5cf32c365fba36fd0542def"},
+            "imagePullPolicy": {"enum": ["IfNotPresent", "Always", "Never"]},
+            "resources": {"type": "object"},
+            "persistence": {
+              "type": "object",
+              "properties": {"size": {"type": "string", "minLength": 1}, "storageClassName": {"type": "string"}}
+            }
+          }
+        },
+        "trust": {
+          "type": "object",
+          "properties": {"caConfigMapName": {"type": "string"}, "caKey": {"type": "string", "minLength": 1}}
+        },
+        "documentAttachments": {"$ref": "#/definitions/unconfigured"},
+        "mcp": {"$ref": "#/definitions/unconfigured"},
+        "costs": {"$ref": "#/definitions/unconfigured"},
+        "rag": {"$ref": "#/definitions/unconfigured"},
+        "codeInterpreter": {"$ref": "#/definitions/unconfigured"},
+        "directConnections": {"$ref": "#/definitions/unconfigured"}
+      },
+      "if": {"properties": {"enabled": {"const": true}}, "required": ["enabled"]},
+      "then": {"required": ["hostname"], "properties": {"hostname": {"pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", "not": {"pattern": "(^|\\.)place\\.holder$"}}}}
+    },
+    "canonicalEndpointRouting": {"type": "object", "properties": {"mode": {"enum": ["internal-traefik", "public-dns"]}}},
+    "externalGateway": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "port": {"type": "integer", "minimum": 1, "maximum": 65535}}},
+    "publicCertificates": {"type": "object", "properties": {"useProduction": {"type": "boolean"}}}
+  },
+  "definitions": {
+    "unconfigured": {"type": "object", "properties": {"enabled": {"const": false}}}
+  }
+}

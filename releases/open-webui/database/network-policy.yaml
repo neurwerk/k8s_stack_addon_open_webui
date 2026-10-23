@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-operations-open-webui-ingress
+  namespace: infra-postgres-operations
+  labels:
+    app.kubernetes.io/part-of: frontend-open-webui
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres-operations
+      app.kubernetes.io/instance: postgres-operations
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: frontend-open-webui}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: frontend-open-webui
+              app.kubernetes.io/instance: frontend-open-webui
+      ports: [{port: 5432, protocol: TCP}]

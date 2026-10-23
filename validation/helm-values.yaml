@@ -1,0 +1,61 @@
+# Synthetic offline render inputs, not usable credentials.
+frontendOpenWebui:
+  enabled: true
+  hostname: chat.example.invalid
+  agentGateway:
+    defaultModel: example-chat
+authKeycloak:
+  hostname: identity.example.invalid
+frontendOpenWebuiSecrets:
+  postgresqlPassword: offline-validation-only
+  openidClientSecret: offline-validation-only
+  webuiSecretKey: offline-validation-only
+  oauthSessionTokenEncryptionKey: offline-validation-only
+  oauthClientInfoEncryptionKey: offline-validation-only
+guardrails:
+  llmPolicyEngine:
+    models:
+      - {name: example-chat, provider: OpenAI, model: upstream-chat, baseURL: "https://provider.example.invalid/v1", authSecret: example-provider-secret}
+      - {name: example-personal-response, provider: OpenAI, model: upstream-response, baseURL: "https://personal.example.invalid/v1"}
+      - {name: example-personal-chat, provider: OpenAI, model: upstream-personal-chat, baseURL: "https://personal-chat.example.invalid/v1"}
+self-hosted-api-providers:
+  - id: local
+    enabled: true
+    profiles: [openai-chat-completions-v1]
+    credentialSources: [none]
+    routes:
+      api: {enabled: true}
+    models:
+      - {name: local-model, upstreamModel: upstream-model}
+external-api-providers:
+  - id: example-global
+    enabled: true
+    provider: OpenAI
+    providerId: example
+    upstreamURL: https://provider.example.invalid/v1
+    authSecret: example-provider-secret
+    profiles: [openai-chat-completions-v1]
+    credentialSources: [global, override]
+    routes:
+      api: {enabled: true}
+    catalogModels: [example-chat]
+  - id: example-personal-responses
+    enabled: true
+    provider: OpenAI
+    providerId: example-personal
+    upstreamURL: https://personal.example.invalid/v1
+    profiles: [openai-responses-v1]
+    credentialSources: [override]
+    routes:
+      api: {enabled: true}
+    catalogModels: [example-personal-response]
+  - id: example-personal-chat
+    enabled: true
+    provider: OpenAI
+    providerId: example-personal-chat
+    upstreamURL: https://personal-chat.example.invalid/v1
+    profiles: [openai-chat-completions-v1]
+    credentialSources: [override]
+    routes:
+      api: {enabled: true}
+    catalogModels: [example-personal-chat]

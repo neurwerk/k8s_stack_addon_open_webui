@@ -1,0 +1,57 @@
+{{- if .Values.frontendOpenWebui.enabled }}
+{{- $hostname := required "frontendOpenWebui.hostname is required" .Values.frontendOpenWebui.hostname -}}
+{{- if or (hasSuffix ".place.holder" $hostname) (eq $hostname "place.holder") (not (regexMatch `^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$` $hostname)) }}{{ fail "Open WebUI certificate approval requires an exact public hostname" }}{{ end -}}
+{{- range $issuer := list (dict "suffix" "staging" "name" "letsencrypt-staging-cluster-issuer") (dict "suffix" "production" "name" "letsencrypt-production-cluster-issuer") }}
+---
+apiVersion: policy.cert-manager.io/v1alpha1
+kind: CertificateRequestPolicy
+metadata:
+  name: cert-manager-public-open-webui-{{ $issuer.suffix }}
+spec:
+  allowed:
+    dnsNames:
+      values: [{{ $hostname | quote }}]
+      required: true
+    isCA: false
+    usages: [digital signature, key encipherment]
+  constraints:
+    minDuration: 2160h
+    maxDuration: 2160h
+    privateKey:
+      algorithm: RSA
+      minSize: 2048
+      maxSize: 2048
+  selector:
+    issuerRef:
+      group: cert-manager.io
+      kind: ClusterIssuer
+      name: {{ $issuer.name }}
+    namespace:
+      matchNames: [frontend-open-webui]
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cert-manager-public-open-webui-use
+rules:
+  - apiGroups: [policy.cert-manager.io]
+    resources: [certificaterequestpolicies]
+    verbs: [use]
+    resourceNames:
+      - cert-manager-public-open-webui-staging
+      - cert-manager-public-open-webui-production
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cert-manager-public-open-webui-use
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cert-manager-public-open-webui-use
+subjects:
+  - kind: ServiceAccount
+    name: infra-cert-manager-controller
+    namespace: infra-cert-manager
+{{- end }}

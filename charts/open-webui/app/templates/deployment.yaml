@@ -1,0 +1,90 @@
+{{- if .Values.frontendOpenWebui.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-open-webui
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "open-webui.labels" . | nindent 4 }}
+  annotations:
+    configmap.reloader.stakater.com/reload: frontend-open-webui-config-map{{ if .Values.frontendOpenWebui.trust.caConfigMapName }},{{ .Values.frontendOpenWebui.trust.caConfigMapName }}{{ end }}
+    secret.reloader.stakater.com/reload: frontend-open-webui-secret
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels:
+      {{- include "open-webui.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "open-webui.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: frontend-open-webui
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: open-webui
+          image: {{ .Values.frontendOpenWebui.app.image | quote }}
+          imagePullPolicy: {{ .Values.frontendOpenWebui.app.imagePullPolicy }}
+          ports:
+            - {name: http, containerPort: 8080, protocol: TCP}
+          envFrom:
+            - configMapRef: {name: frontend-open-webui-config-map}
+            - secretRef: {name: frontend-open-webui-secret}
+          env:
+            - {name: HOME, value: /tmp}
+            - {name: STATIC_DIR, value: /tmp/static}
+            - {name: UVICORN_WORKERS, value: "1"}
+            {{- if .Values.frontendOpenWebui.trust.caConfigMapName }}
+            - {name: SSL_CERT_FILE, value: /etc/open-webui-trust/ca.crt}
+            - {name: REQUESTS_CA_BUNDLE, value: /etc/open-webui-trust/ca.crt}
+            - {name: CURL_CA_BUNDLE, value: /etc/open-webui-trust/ca.crt}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            {{- toYaml .Values.frontendOpenWebui.app.resources | nindent 12 }}
+          startupProbe:
+            httpGet: {path: /health, port: http}
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: {path: /health/db, port: http}
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: {path: /health, port: http}
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - {name: data, mountPath: /app/backend/data}
+            - {name: tmp, mountPath: /tmp}
+            {{- if .Values.frontendOpenWebui.trust.caConfigMapName }}
+            - {name: trust, mountPath: /etc/open-webui-trust, readOnly: true}
+            {{- end }}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: frontend-open-webui-data}
+        - name: tmp
+          emptyDir: {}
+        {{- if .Values.frontendOpenWebui.trust.caConfigMapName }}
+        - name: trust
+          configMap:
+            name: {{ .Values.frontendOpenWebui.trust.caConfigMapName }}
+            items:
+              - {key: {{ .Values.frontendOpenWebui.trust.caKey }}, path: ca.crt}
+        {{- end }}
+{{- end }}

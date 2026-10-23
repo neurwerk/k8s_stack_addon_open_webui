@@ -1,0 +1,3 @@
+frontendOpenWebui:
+  enabled: false
+  hostname: ""

@@ -1,0 +1,19 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: open-webui-oidc-secret
+  namespace: auth-keycloak
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: SecretStore
+    name: auth-keycloak-openbao-secret-store
+  target:
+    name: open-webui-oidc-secret
+    creationPolicy: Owner
+    deletionPolicy: Retain
+  data:
+    - secretKey: clientSecret
+      remoteRef:
+        key: auth-keycloak/internal
+        property: openwebuiClientSecret
