@@ -19,4 +19,5 @@ spec:
             matchLabels:
               app.kubernetes.io/name: frontend-open-webui
               app.kubernetes.io/instance: frontend-open-webui
-      ports: [{port: 5432, protocol: TCP}]
+      # PostgreSQL Service 5432 targets the provider pod port 9712.
+      ports: [{port: 9712, protocol: TCP}]

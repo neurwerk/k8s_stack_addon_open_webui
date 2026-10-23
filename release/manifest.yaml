@@ -3,7 +3,7 @@ kind: AddonRelease
 metadata:
   name: open-webui
 spec:
-  version: 0.1.1
+  version: 0.1.2
   status: ready
   sourceName: open-webui-addon
   configurationKey: frontendOpenWebui
