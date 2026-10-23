@@ -1,0 +1,40 @@
+frontendOpenWebui:
+  enabled: false
+  hostname: ""
+  app:
+    # Official upstream index; linux/amd64 manifest and source labels verified.
+    image: ghcr.io/open-webui/open-webui:v0.12.3@sha256:a537bbe1e6b428820f52ed4a029d7fff97062e24d5cf32c365fba36fd0542def
+    imagePullPolicy: IfNotPresent
+    # One worker and replica keep upstream's in-process OAuth refresh lock valid.
+    replicas: 1
+    resources:
+      requests: {cpu: 250m, memory: 1Gi}
+      limits: {cpu: "2", memory: 4Gi}
+    persistence:
+      size: 10Gi
+      storageClassName: ""
+  trust:
+    # Optional complete PEM trust bundle (public roots plus private roots).
+    caConfigMapName: ""
+    caKey: ca-bundle.crt
+  documentAttachments:
+    # UI permission only: upstream upload API does not enforce it.
+    enabled: false
+  mcp:
+    enabled: false
+  costs:
+    enabled: false
+  rag:
+    enabled: false
+  codeInterpreter:
+    enabled: false
+  directConnections:
+    enabled: false
+externalGateway:
+  enabled: true
+  port: 443
+publicCertificates:
+  useProduction: true
+canonicalEndpointRouting:
+  # Match the shared canonical identity routing mode.
+  mode: internal-traefik

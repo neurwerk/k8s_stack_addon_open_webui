@@ -1,0 +1,6 @@
+apiVersion: v2
+name: open-webui-app
+description: Official Open WebUI browser application
+type: application
+version: 0.1.0
+appVersion: 0.12.3

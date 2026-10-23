@@ -1,0 +1,37 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: keycloak-open-webui-access
+  namespace: auth-keycloak
+spec:
+  interval: 5m
+  timeout: 15m
+  dependsOn:
+    - name: keycloak-realm-roles
+  install:
+    strategy: {name: RetryOnFailure, retryInterval: 1m}
+  upgrade:
+    strategy: {name: RetryOnFailure, retryInterval: 1m}
+  chart:
+    spec:
+      chart: ./charts/keycloak/addon-access
+      sourceRef: {kind: GitRepository, name: k8s-stack, namespace: flux-system}
+  valuesFrom:
+    - {kind: ConfigMap, name: auth-keycloak-app-defaults}
+    - {kind: ConfigMap, name: client-values}
+    - {kind: ConfigMap, name: keycloak-product-values}
+    - {kind: ConfigMap, name: open-webui-oidc-approval-values}
+  values:
+    addonAccess:
+      enabled: true
+      name: open-webui
+      realmRoles: [open-webui-user, open-webui-admin]
+      ownedRoles: [open-webui-user, open-webui-admin]
+      realmRoleComposites:
+        open-webui-admin: [open-webui-user]
+      platformAdminRole: open-webui-admin
+      accessGroups:
+        /access/neurwerk-open-webui-admins:
+          realmRoles: [open-webui-admin]
+        /access/neurwerk-open-webui-users:
+          realmRoles: [open-webui-user]

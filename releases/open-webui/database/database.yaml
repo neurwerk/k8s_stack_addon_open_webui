@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: open-webui-postgres
+  namespace: infra-postgres-operations
+spec:
+  interval: 5m
+  timeout: 15m
+  install:
+    strategy: {name: RetryOnFailure, retryInterval: 1m}
+  upgrade:
+    strategy: {name: RetryOnFailure, retryInterval: 1m}
+  dependsOn:
+    - name: postgres-operations
+  chart:
+    spec:
+      chart: ./charts/postgres/addon
+      sourceRef: {kind: GitRepository, name: k8s-stack, namespace: flux-system}
+  values:
+    addon:
+      role: openwebui
+      databases: [{name: openwebui, vector: false}]
+      passwordSecret: open-webui-postgres-password

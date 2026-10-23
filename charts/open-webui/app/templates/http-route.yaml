@@ -1,0 +1,18 @@
+{{- if and .Values.frontendOpenWebui.enabled .Values.externalGateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend-open-webui-httproute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "open-webui.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - {name: frontend-open-webui-gateway, sectionName: websecure}
+  hostnames: [{{ .Values.frontendOpenWebui.hostname | quote }}]
+  rules:
+    - matches:
+        - path: {type: PathPrefix, value: /}
+      backendRefs:
+        - {name: frontend-open-webui, port: 8080}
+{{- end }}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "frontendOpenWebui": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "hostname": {"type": "string"},
+        "agentGateway": {
+          "type": "object",
+          "properties": {
+            "origin": {"const": "http://infra-agentgateway-gateway.infra-agentgateway.svc.cluster.local:8082"},
+            "defaultModel": {"type": "string"}
+          }
+        },
+        "documentAttachments": {"$ref": "#/definitions/unconfigured"},
+        "mcp": {"$ref": "#/definitions/unconfigured"},
+        "costs": {"$ref": "#/definitions/unconfigured"},
+        "rag": {"$ref": "#/definitions/unconfigured"},
+        "codeInterpreter": {"$ref": "#/definitions/unconfigured"},
+        "directConnections": {"$ref": "#/definitions/unconfigured"}
+      },
+      "if": {"properties": {"enabled": {"const": true}}, "required": ["enabled"]},
+      "then": {"required": ["hostname"], "properties": {"hostname": {"pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$", "not": {"pattern": "(^|\\.)place\\.holder$"}}}}
+    },
+    "authKeycloak": {
+      "type": "object",
+      "properties": {
+        "hostname": {"type": "string"},
+        "realm": {"type": "string", "pattern": "^[a-zA-Z0-9_-]+$"},
+        "openwebuiClientId": {"const": "open-webui"}
+      }
+    },
+    "frontendOpenWebuiSecrets": {"type": "object"},
+    "openrouterCatalog": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "models": {"type": "array"}, "excludedModels": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}}},
+    "self-hosted-api-providers": {"type": "array"},
+    "external-api-providers": {"type": "array"}
+  },
+  "allOf": [{
+    "if": {"properties": {"frontendOpenWebui": {"properties": {"enabled": {"const": true}}, "required": ["enabled"]}}, "required": ["frontendOpenWebui"]},
+    "then": {"properties": {"authKeycloak": {"properties": {"hostname": {"minLength": 1, "pattern": "^[a-z0-9.-]+$"}}}}}
+  }],
+  "definitions": {
+    "unconfigured": {"type": "object", "properties": {"enabled": {"const": false}}}
+  }
+}

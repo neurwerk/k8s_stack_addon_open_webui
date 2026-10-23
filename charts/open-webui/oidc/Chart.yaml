@@ -1,0 +1,5 @@
+apiVersion: v2
+name: open-webui-oidc
+description: Exact Open WebUI browser OIDC settings
+type: application
+version: 0.1.0

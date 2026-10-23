@@ -1,0 +1,20 @@
+{{- if .Values.frontendOpenWebui.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frontend-open-webui-data
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "open-webui.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: {{ .Values.frontendOpenWebui.app.persistence.size }}
+  {{- with .Values.frontendOpenWebui.app.persistence.storageClassName }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+{{- end }}

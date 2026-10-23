@@ -1,0 +1,29 @@
+{{- if .Values.frontendOpenWebui.enabled }}
+{{- $hostname := required "frontendOpenWebui.hostname is required" .Values.frontendOpenWebui.hostname -}}
+{{- if or (hasSuffix ".place.holder" $hostname) (eq $hostname "place.holder") (not (regexMatch `^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$` $hostname)) }}{{ fail "Open WebUI requires an exact public hostname" }}{{ end -}}
+{{- $redirect := printf "https://%s/oauth/oidc/callback" $hostname -}}
+{{- $origin := printf "https://%s" $hostname -}}
+{{- if and .Values.authKeycloak.openwebuiRedirectUri (ne .Values.authKeycloak.openwebuiRedirectUri $redirect) }}{{ fail "authKeycloak.openwebuiRedirectUri must match the application callback" }}{{ end -}}
+{{- if and .Values.authKeycloak.openwebuiWebOrigin (ne .Values.authKeycloak.openwebuiWebOrigin $origin) }}{{ fail "authKeycloak.openwebuiWebOrigin must match the application origin" }}{{ end -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open-webui-oidc-settings
+  namespace: {{ .Release.Namespace }}
+  labels:
+    reconcile.fluxcd.io/watch: Enabled
+data:
+  values.yaml: |
+    enabled: true
+    authentication:
+      clientId: {{ .Values.authKeycloak.openwebuiClientId | quote }}
+      redirectUris: [{{ $redirect | quote }}]
+      webOrigins: [{{ $origin | quote }}]
+      realmRoles: [open-webui-user, open-webui-admin]
+      roleClaim: realm_access.roles
+      audiences: [agentgateway]
+      refreshTokenRotation: true
+      mode: login+gateway
+      userTokenForwarding: true
+      gatewayPermissions: {{ .Values.authKeycloak.agentgatewayClientRoles | toJson }}
+{{- end }}

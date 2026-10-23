@@ -1,0 +1,56 @@
+apiVersion: addons.neurwerk.com/v1alpha1
+kind: AddonRelease
+metadata:
+  name: open-webui
+spec:
+  version: 0.1.0
+  status: staged
+  sourceName: open-webui-addon
+  configurationKey: frontendOpenWebui
+  inputs:
+    - {kind: ConfigMap, namespace: auth-keycloak, name: auth-keycloak-app-defaults, owner: base}
+    - {kind: ConfigMap, namespace: auth-keycloak, name: client-values, owner: client}
+    - {kind: ConfigMap, namespace: auth-keycloak, name: keycloak-product-values, owner: client}
+    - {kind: ConfigMap, namespace: auth-keycloak, name: open-webui-oidc-approval-values, owner: client}
+    - {kind: ConfigMap, namespace: frontend-open-webui, name: client-values, owner: client}
+    - {kind: ConfigMap, namespace: frontend-open-webui, name: open-webui-product-values, owner: client}
+    - {kind: ConfigMap, namespace: frontend-open-webui, name: open-webui-agentgateway-model-values, owner: client}
+    - {kind: ConfigMap, namespace: infra-cert-manager, name: client-values, owner: client}
+  prerequisites:
+    base: 0.3.29
+    tooling: 0.13.3
+    stackSetup: 0.6.4
+    baseCharts:
+      - charts/postgres/addon
+      - charts/keycloak/addon-access
+      - charts/keycloak/addon-oidc
+  packages:
+    - name: namespaces
+      path: releases/namespaces/open-webui
+    - name: secret-sync
+      path: releases/open-webui/secret-sync
+      dependsOn: [namespaces]
+    - name: database
+      path: releases/open-webui/database
+      dependsOn: [secret-sync]
+    - name: access
+      path: releases/open-webui/access
+      dependsOn: [secret-sync]
+    - name: oidc
+      path: releases/open-webui/oidc
+      dependsOn: [access, secret-sync]
+      helmOutputs:
+        - kind: ConfigMap
+          namespace: auth-keycloak
+          name: open-webui-oidc-settings
+          helmRelease: open-webui-oidc-settings
+    - name: certificate-approval
+      path: releases/open-webui/certificate-approval
+      dependsOn: [namespaces]
+    - name: app
+      path: releases/open-webui/app
+      dependsOn: [database, oidc, certificate-approval]
+  retention:
+    databases: retain
+    volumes: retain
+    credentials: retain

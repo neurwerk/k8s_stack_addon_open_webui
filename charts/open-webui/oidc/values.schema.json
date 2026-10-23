@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "frontendOpenWebui": {"type": "object", "properties": {"enabled": {"type": "boolean"}, "hostname": {"type": "string"}}},
+    "authKeycloak": {"type": "object", "properties": {"openwebuiClientId": {"const": "open-webui"}, "openwebuiRedirectUri": {"type": "string"}, "openwebuiWebOrigin": {"type": "string"}, "agentgatewayClientRoles": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}}}
+  }
+}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: open-webui-certificate-approval
+description: Exact certificate approval for Open WebUI
+type: application
+version: 0.1.0
