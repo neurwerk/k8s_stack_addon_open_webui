@@ -2,5 +2,5 @@ apiVersion: v2
 name: open-webui-shared
 description: Open WebUI configuration and scoped runtime secrets
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: 0.12.3

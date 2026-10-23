@@ -27,8 +27,8 @@ data:
   ENABLE_OAUTH_EMAIL_FALLBACK: "False"
   OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "False"
   DEFAULT_USER_ROLE: pending
-  OAUTH_ALLOWED_ROLES: open-webui-user,open-webui-admin
-  OAUTH_ADMIN_ROLES: open-webui-admin
+  OAUTH_ALLOWED_ROLES: openwebui-user,openwebui-admin
+  OAUTH_ADMIN_ROLES: openwebui-admin
   OAUTH_ROLES_CLAIM: realm_access.roles
   OAUTH_SCOPES: openid email profile
   OAUTH_PROVIDER_NAME: Keycloak

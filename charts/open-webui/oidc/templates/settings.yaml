@@ -19,7 +19,7 @@ data:
       clientId: {{ .Values.authKeycloak.openwebuiClientId | quote }}
       redirectUris: [{{ $redirect | quote }}]
       webOrigins: [{{ $origin | quote }}]
-      realmRoles: [open-webui-user, open-webui-admin]
+      realmRoles: [openwebui-user, openwebui-admin]
       roleClaim: realm_access.roles
       audiences: [agentgateway]
       refreshTokenRotation: true
