@@ -56,7 +56,11 @@ data:
   ENABLE_OPENAI_API_PASSTHROUGH: "False"
   ENABLE_DIRECT_CONNECTIONS: "False"
   ENABLE_DIRECT_INTEGRATIONS: "False"
-  TOOL_SERVER_CONNECTIONS: "[]"
+  ENABLE_TOOL_SERVERS: {{ ternary "True" "False" .Values.frontendOpenWebui.mcp.enabled | quote }}
+  {{- if .Values.frontendOpenWebui.mcp.enabled }}
+  ENABLE_PLUGINS: "True"
+  {{- end }}
+  TOOL_SERVER_CONNECTIONS: {{ include "open-webui.mcpConnections" . | quote }}
   TERMINAL_SERVER_CONNECTIONS: "[]"
   ENABLE_CODE_EXECUTION: "False"
   ENABLE_CODE_INTERPRETER: "False"

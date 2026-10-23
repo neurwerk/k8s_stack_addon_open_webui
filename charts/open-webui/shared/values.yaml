@@ -5,7 +5,10 @@ frontendOpenWebui:
     origin: http://infra-agentgateway-gateway.infra-agentgateway.svc.cluster.local:8082
     defaultModel: ""
   documentAttachments: {enabled: false}
-  mcp: {enabled: false}
+  mcp:
+    enabled: false
+    # Explicit subset; selection grants no AgentGateway permissions.
+    servers: []
   costs: {enabled: false}
   rag: {enabled: false}
   codeInterpreter: {enabled: false}
@@ -24,3 +27,9 @@ guardrails:
     models: []
 self-hosted-api-providers: []
 external-api-providers: []
+mcp-servers:
+  enabled: false
+  contextforgeRoutesEnabled: []
+  catalog:
+    presets: {}
+    custom: []

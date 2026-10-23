@@ -22,6 +22,8 @@ frontendOpenWebui:
     enabled: false
   mcp:
     enabled: false
+    # Explicit subset of enabled canonical mcp-servers catalog IDs.
+    servers: []
   costs:
     enabled: false
   rag:
