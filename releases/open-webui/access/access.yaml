@@ -24,14 +24,14 @@ spec:
   values:
     addonAccess:
       enabled: true
-      name: open-webui
-      realmRoles: [open-webui-user, open-webui-admin]
-      ownedRoles: [open-webui-user, open-webui-admin]
+      name: openwebui
+      realmRoles: [openwebui-user, openwebui-admin]
+      ownedRoles: [openwebui-user, openwebui-admin]
       realmRoleComposites:
-        open-webui-admin: [open-webui-user]
-      platformAdminRole: open-webui-admin
+        openwebui-admin: [openwebui-user]
+      platformAdminRole: openwebui-admin
       accessGroups:
-        /access/neurwerk-open-webui-admins:
-          realmRoles: [open-webui-admin]
-        /access/neurwerk-open-webui-users:
-          realmRoles: [open-webui-user]
+        /access/neurwerk-openwebui-admins:
+          realmRoles: [openwebui-admin]
+        /access/neurwerk-openwebui-users:
+          realmRoles: [openwebui-user]
