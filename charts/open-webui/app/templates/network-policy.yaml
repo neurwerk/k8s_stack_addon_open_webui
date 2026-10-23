@@ -30,7 +30,8 @@ spec:
             matchLabels: {kubernetes.io/metadata.name: infra-postgres-operations}
           podSelector:
             matchLabels: {app.kubernetes.io/name: postgres-operations}
-      ports: [{port: 5432, protocol: TCP}]
+      # PostgreSQL Service 5432 targets the provider pod port 9712.
+      ports: [{port: 9712, protocol: TCP}]
     - to:
         - namespaceSelector:
             matchLabels: {kubernetes.io/metadata.name: infra-agentgateway}
