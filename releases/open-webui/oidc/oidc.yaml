@@ -26,6 +26,8 @@ spec:
     - {kind: ConfigMap, name: keycloak-product-values}
     - {kind: ConfigMap, name: open-webui-oidc-approval-values}
   values:
+    k8sTools:
+      image: ghcr.io/neurwerk/k8s-stack-tooling:0.13.6@sha256:cb6dd181ca5e081add9e6267d9abc634f65898399b36038c305a9573f6a657de
     clientSecret:
       name: open-webui-oidc-secret
       key: clientSecret
