@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neurwerk/k8s_stack_tooling
-          ref: fee1854a8d55d1b9ded5dda221e4fb854ef66c56
+          ref: baa33e7b318142b5c0ad7eb9ae01d5f09e381406
           path: .ci/tooling
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.0.0

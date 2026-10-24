@@ -3,7 +3,7 @@ kind: AddonRelease
 metadata:
   name: open-webui
 spec:
-  version: 0.1.3
+  version: 0.1.4
   status: ready
   sourceName: open-webui-addon
   configurationKey: frontendOpenWebui
@@ -18,12 +18,14 @@ spec:
     - {kind: ConfigMap, namespace: infra-cert-manager, name: client-values, owner: client}
   prerequisites:
     base: 0.3.29
-    tooling: 0.12.0
+    tooling: 0.13.6
     stackSetup: 0.6.4
     baseCharts:
       - charts/postgres/addon
       - charts/keycloak/addon-access
       - charts/keycloak/addon-oidc
+    baseChartVersions:
+      charts/keycloak/addon-oidc: 0.1.4
   packages:
     - name: namespaces
       path: releases/namespaces/open-webui
