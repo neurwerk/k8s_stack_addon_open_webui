@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  # Reviewed candidate for source CI only; tag-driven publication requires stable Base.
+  # Source/tooling-image quality uses this reviewed immutable candidate; integration tags require stable Base.
   BASE_REF: e5eca150c0f71d3f80b135c67f2451758a8f3db1
 
 jobs:
@@ -50,7 +50,24 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neurwerk/k8s_stack_base
-          ref: ${{ startsWith(github.ref, 'refs/tags/') && steps.prerequisite.outputs.base || env.BASE_REF }}
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && !startsWith(github.ref, 'refs/tags/tooling/v') && steps.prerequisite.outputs.base || env.BASE_REF }}
           path: .ci/base
       - name: Run full validation
         run: make check BASE_REPO="$GITHUB_WORKSPACE/.ci/base"
+      - name: Build the tooling image without publication
+        run: |
+          version="$(uv run --locked --project tooling python -c 'import tomllib; print(tomllib.load(open("tooling/pyproject.toml", "rb"))["project"]["version"])')"
+          make tooling-build VERSION="$version" REVISION="$GITHUB_SHA"
+      - name: Verify installed CLI and default non-root image user offline
+        run: |
+          image="$(uv run --locked --project tooling python - <<'PY'
+          from pathlib import Path
+          from k8s_stack_tooling.addons import load_manifest
+          addon = load_manifest(Path("release/manifest.yaml"))
+          print(next(a.image.split("@", 1)[0] for a in addon.spec.artifacts if a.id == "tooling"))
+          PY
+          )"
+          docker run --rm --network none --read-only "$image" open-webui-validate --help
+          docker run --rm --network none --read-only \
+            --entrypoint /opt/tooling/.venv/bin/python "$image" -c \
+            'import os; assert os.getuid() == 65532; assert os.getgid() == 65532'
