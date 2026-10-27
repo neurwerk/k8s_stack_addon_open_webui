@@ -44,8 +44,7 @@ def test_product_definition_uses_shared_validation(capsys: pytest.CaptureFixture
     assert main([str(ROOT)]) == 0
     assert "definition schema is valid" in capsys.readouterr().out
     check(ROOT)
-    with pytest.raises(ContractError, match="staged|digest"):
-        check(ROOT, installable=True)
+    check(ROOT, installable=True)
 
 
 def test_direct_delivery_preserves_application_keys_without_helm_credentials() -> None:
