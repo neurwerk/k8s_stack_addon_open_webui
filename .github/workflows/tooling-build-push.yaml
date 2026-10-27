@@ -1,0 +1,147 @@
+name: Build and Push Add-on Tooling
+
+on:
+  push:
+    tags: ["tooling/v*"]
+
+concurrency:
+  group: open-webui-tooling-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: ghcr.io/neurwerk/k8s-stack-addon-open-webui-tooling
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.7"
+      - name: Validate tag, add-on, package and lock versions
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^tooling/v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
+          export RELEASE_VERSION="${BASH_REMATCH[1]}"
+          uv run --locked --project tooling python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+          from k8s_stack_tooling.addons import load_manifest
+
+          expected = os.environ["RELEASE_VERSION"]
+          project = tomllib.loads(Path("tooling/pyproject.toml").read_text())
+          lock = tomllib.loads(Path("tooling/uv.lock").read_text())
+          locked = next(p["version"] for p in lock["package"] if p["name"] == "open-webui-tooling")
+          addon = load_manifest(Path("release/manifest.yaml"))
+          if {project["project"]["version"], locked, addon.spec.version} != {expected}:
+              raise SystemExit("Tag, add-on, package and lock versions must match")
+          artifact = next(a for a in addon.spec.artifacts if a.id == "tooling")
+          if artifact.image.split("@", 1)[0] != os.environ["IMAGE_NAME"] + ":" + expected:
+              raise SystemExit("Declared tooling image must match the release")
+          PY
+      - run: uv lock --check --project tooling
+
+  quality:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  build:
+    needs: [validate, quality]
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.resolve.outputs.digest }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        id: meta
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          flavor: latest=false
+          tags: type=match,pattern=tooling/v(.*),group=1
+      - name: Inspect existing version without overwriting another revision
+        id: inspect
+        env:
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: |
+          image="$IMAGE_NAME:${GITHUB_REF_NAME#tooling/v}"
+          set +e
+          manifest="$(docker buildx imagetools inspect "$image" --format '{{json .Manifest}}' 2>&1)"
+          status=$?
+          set -e
+          if (( status != 0 )); then
+            if [[ "$manifest" == *"not found"* || "$manifest" == *"manifest unknown"* ]]; then
+              echo 'exists=false' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo 'Registry verification failed; refusing publication' >&2
+            exit 1
+          fi
+          digest="$(jq -er '.digest | select(type == "string")' <<< "$manifest")"
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          config="$(docker buildx imagetools inspect "$IMAGE_NAME@$digest" --format '{{json .Image}}')"
+          jq -e '.os == "linux" and .architecture == "amd64"' <<< "$config" > /dev/null
+          revision="$(jq -er '.config.Labels["org.opencontainers.image.revision"]' <<< "$config")"
+          test "$revision" = "$EXPECTED_REVISION"
+          echo 'exists=true' >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        if: steps.inspect.outputs.exists == 'false'
+        id: build
+        with:
+          context: tooling
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            REVISION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Record digest and require public package visibility
+        id: resolve
+        env:
+          BUILT_DIGEST: ${{ steps.build.outputs.digest }}
+          EXISTING_DIGEST: ${{ steps.inspect.outputs.digest }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          digest="${BUILT_DIGEST:-$EXISTING_DIGEST}"
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          visibility="$(gh api /orgs/neurwerk/packages/container/k8s-stack-addon-open-webui-tooling --jq .visibility)"
+          test "$visibility" = public
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish tooling artifact notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE_DIGEST: ${{ needs.build.outputs.digest }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          [[ "$IMAGE_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          notes="Tooling image: $IMAGE_NAME:${RELEASE_TAG#tooling/v}@$IMAGE_DIGEST. Verify anonymous pull access before adoption."
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            current="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body)"
+            [[ "$current" == *"$IMAGE_DIGEST"* ]]
+          else
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "Open WebUI Neurwerk add-on tooling v${RELEASE_TAG#tooling/v}" --notes "$notes"
+          fi

@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_call:
   push:
     branches: [main]
   pull_request:
@@ -20,12 +21,7 @@ jobs:
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: true
-      - name: Check out addon validation
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: neurwerk/k8s_stack_tooling
-          ref: baa33e7b318142b5c0ad7eb9ae01d5f09e381406
-          path: .ci/tooling
+          version: "0.12.7"
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.0.0
         with:
@@ -42,5 +38,15 @@ jobs:
           uri: https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz
           name: kubeconform
           version: v0.8.0
+      - name: Read exact Base prerequisite
+        id: prerequisite
+        run: |
+          uv run --locked --project tooling python -c 'from pathlib import Path; from k8s_stack_tooling.addons import load_manifest; print("base=v" + load_manifest(Path("release/manifest.yaml")).spec.prerequisites.base)' >> "$GITHUB_OUTPUT"
+      - name: Acquire selected Base release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neurwerk/k8s_stack_base
+          ref: ${{ steps.prerequisite.outputs.base }}
+          path: .ci/base
       - name: Run full validation
-        run: make check ADDON_TOOLING="$GITHUB_WORKSPACE/.ci/tooling"
+        run: make check BASE_REPO="$GITHUB_WORKSPACE/.ci/base"

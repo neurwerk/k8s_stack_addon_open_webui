@@ -17,7 +17,6 @@ authKeycloak:
   hostname: ""
   realm: neurwerk
   openwebuiClientId: open-webui
-frontendOpenWebuiSecrets: {}
 openrouterCatalog:
   enabled: false
   models: []

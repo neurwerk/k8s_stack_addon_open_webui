@@ -26,7 +26,7 @@ spec:
       auth:
         kubernetes:
           mountPath: kubernetes
-          role: frontend-open-webui
+          role: addon-open-webui-runtime
           serviceAccountRef:
             name: frontend-open-webui-external-secrets
             audiences: [openbao]
@@ -42,31 +42,24 @@ spec:
     name: frontend-open-webui-openbao-secret-store
     kind: SecretStore
   target:
-    name: frontend-open-webui-runtime-secret
+    name: frontend-open-webui-secret
     creationPolicy: Owner
     deletionPolicy: Retain
     template:
       engineVersion: v2
+      mergePolicy: Merge
       type: Opaque
       metadata:
         labels:
           reconcile.fluxcd.io/watch: Enabled
-      data:
-        values.yaml: |
-          frontendOpenWebuiSecrets:
-            postgresqlPassword: {{ .postgresqlPassword | quote }}
-            openidClientSecret: {{ .openidClientSecret | quote }}
-            webuiSecretKey: {{ .webuiSecretKey | quote }}
-            oauthSessionTokenEncryptionKey: {{ .oauthSessionTokenEncryptionKey | quote }}
-            oauthClientInfoEncryptionKey: {{ .oauthClientInfoEncryptionKey | quote }}
   data:
-    - secretKey: postgresqlPassword
-      remoteRef: {key: frontend-open-webui/internal, property: postgresqlPassword}
-    - secretKey: openidClientSecret
-      remoteRef: {key: frontend-open-webui/internal, property: openidClientSecret}
-    - secretKey: webuiSecretKey
-      remoteRef: {key: frontend-open-webui/internal, property: webuiSecretKey}
-    - secretKey: oauthSessionTokenEncryptionKey
-      remoteRef: {key: frontend-open-webui/internal, property: oauthSessionTokenEncryptionKey}
-    - secretKey: oauthClientInfoEncryptionKey
-      remoteRef: {key: frontend-open-webui/internal, property: oauthClientInfoEncryptionKey}
+    - secretKey: DATABASE_PASSWORD
+      remoteRef: {key: addons/open-webui/database, property: password}
+    - secretKey: OAUTH_CLIENT_SECRET
+      remoteRef: {key: addons/open-webui/oidc, property: clientSecret}
+    - secretKey: WEBUI_SECRET_KEY
+      remoteRef: {key: addons/open-webui/runtime, property: webuiSecretKey}
+    - secretKey: OAUTH_SESSION_TOKEN_ENCRYPTION_KEY
+      remoteRef: {key: addons/open-webui/runtime, property: oauthSessionTokenEncryptionKey}
+    - secretKey: OAUTH_CLIENT_INFO_ENCRYPTION_KEY
+      remoteRef: {key: addons/open-webui/runtime, property: oauthClientInfoEncryptionKey}

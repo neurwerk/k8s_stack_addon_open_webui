@@ -18,7 +18,6 @@ spec:
   valuesFrom:
     - {kind: ConfigMap, name: frontend-open-webui-app-defaults}
     - {kind: ConfigMap, name: client-openrouter-catalog-values, optional: true}
-    - {kind: Secret, name: frontend-open-webui-runtime-secret}
     - {kind: ConfigMap, name: client-values}
     - {kind: ConfigMap, name: open-webui-agentgateway-model-values}
     - {kind: ConfigMap, name: open-webui-product-values}

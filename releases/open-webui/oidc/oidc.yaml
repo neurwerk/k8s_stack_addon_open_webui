@@ -27,7 +27,7 @@ spec:
     - {kind: ConfigMap, name: open-webui-oidc-approval-values}
   values:
     k8sTools:
-      image: ghcr.io/neurwerk/k8s-stack-tooling:0.13.6@sha256:cb6dd181ca5e081add9e6267d9abc634f65898399b36038c305a9573f6a657de
+      image: ghcr.io/neurwerk/k8s-stack-tooling:0.14.0@sha256:a1db80f00e8579478382ecc34717af484cf75239008ae8dbe66b01632aa49305
     clientSecret:
       name: open-webui-oidc-secret
       key: clientSecret

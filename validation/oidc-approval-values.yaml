@@ -1,0 +1,15 @@
+# Synthetic client-owned approval; never include in a release package.
+clientApproval:
+  clientId: open-webui
+  redirectUris: [https://chat.example.invalid/oauth/oidc/callback]
+  webOrigins: [https://chat.example.invalid]
+  postLogoutRedirectUris: [https://chat.example.invalid/auth]
+  realmRoles: [openwebui-user, openwebui-admin]
+  audiences: [agentgateway]
+  gatewayPermissions: []
+authKeycloak:
+  realm: example
+  adminUser: example-admin
+clientSecret:
+  name: open-webui-oidc-secret
+  key: clientSecret

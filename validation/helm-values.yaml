@@ -1,4 +1,4 @@
-# Synthetic offline render inputs, not usable credentials.
+# Synthetic nonsecret offline render inputs.
 frontendOpenWebui:
   enabled: true
   hostname: chat.example.invalid
@@ -6,12 +6,6 @@ frontendOpenWebui:
     defaultModel: example-chat
 authKeycloak:
   hostname: identity.example.invalid
-frontendOpenWebuiSecrets:
-  postgresqlPassword: offline-validation-only
-  openidClientSecret: offline-validation-only
-  webuiSecretKey: offline-validation-only
-  oauthSessionTokenEncryptionKey: offline-validation-only
-  oauthClientInfoEncryptionKey: offline-validation-only
 guardrails:
   llmPolicyEngine:
     models:
