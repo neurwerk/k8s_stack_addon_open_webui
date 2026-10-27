@@ -15,5 +15,5 @@ spec:
   data:
     - secretKey: password
       remoteRef:
-        key: infra-postgres-operations/internal
-        property: openwebuiPassword
+        key: addons/open-webui/database
+        property: password

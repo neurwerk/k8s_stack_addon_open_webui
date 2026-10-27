@@ -15,5 +15,5 @@ spec:
   data:
     - secretKey: clientSecret
       remoteRef:
-        key: auth-keycloak/internal
-        property: openwebuiClientSecret
+        key: addons/open-webui/oidc
+        property: clientSecret
