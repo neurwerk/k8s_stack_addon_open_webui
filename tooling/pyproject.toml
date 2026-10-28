@@ -1,6 +1,6 @@
 [project]
 name = "open-webui-tooling"
-version = "0.2.0"
+version = "0.2.1"
 description = "Offline definition validation for the Open WebUI add-on"
 requires-python = ">=3.12"
 dependencies = ["k8s-stack-tooling==0.15.0"]

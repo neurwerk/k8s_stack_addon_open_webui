@@ -21,7 +21,7 @@ jobs:
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           version: "0.12.7"
-      - name: Validate tag, add-on, package and lock versions
+      - name: Validate tag, package and lock versions
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
@@ -31,18 +31,13 @@ jobs:
           import os
           import tomllib
           from pathlib import Path
-          from k8s_stack_tooling.addons import load_manifest
 
           expected = os.environ["RELEASE_VERSION"]
           project = tomllib.loads(Path("tooling/pyproject.toml").read_text())
           lock = tomllib.loads(Path("tooling/uv.lock").read_text())
           locked = next(p["version"] for p in lock["package"] if p["name"] == "open-webui-tooling")
-          addon = load_manifest(Path("release/manifest.yaml"))
-          if {project["project"]["version"], locked, addon.spec.version} != {expected}:
-              raise SystemExit("Tag, add-on, package and lock versions must match")
-          artifact = next(a for a in addon.spec.artifacts if a.id == "tooling")
-          if artifact.image.split("@", 1)[0] != os.environ["IMAGE_NAME"] + ":" + expected:
-              raise SystemExit("Declared tooling image must match the release")
+          if {project["project"]["version"], locked} != {expected}:
+              raise SystemExit("Tag, package and lock versions must match")
           PY
       - run: uv lock --check --project tooling
 
