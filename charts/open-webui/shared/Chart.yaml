@@ -2,5 +2,5 @@ apiVersion: v2
 name: open-webui-shared
 description: Open WebUI nonsecret runtime configuration
 type: application
-version: 0.1.4
+version: 1.0.0
 appVersion: 0.12.3

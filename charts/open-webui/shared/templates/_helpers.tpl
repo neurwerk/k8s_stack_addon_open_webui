@@ -23,11 +23,13 @@
 {{- if hasKey $bindingIds $binding.id }}{{ fail "duplicate API binding id" }}{{ end -}}
 {{- $_ := set $bindingIds $binding.id true -}}
 {{- $api := ($binding.routes | default dict).api | default dict -}}
-{{/* Base's public global/override names normalize to company/caller_supplied. */}}
 {{- $sources := $binding.credentialSources | default list -}}
-{{- $company := or (has "global" $sources) (has "company" $sources) -}}
+{{- range $source := $sources -}}
+{{- if not (has $source (list "global" "override" "none")) }}{{ fail "binding credentialSources accepts only global, override or none" }}{{ end -}}
+{{- end -}}
+{{- $global := has "global" $sources -}}
 {{- $local := and (eq $group "self-hosted-api-providers") (eq (toJson $sources) `["none"]`) -}}
-{{- if and $binding.enabled (eq (toJson $api.enabled) "true") (has "openai-chat-completions-v1" ($binding.profiles | default list)) (or $company $local) -}}
+{{- if and $binding.enabled (eq (toJson $api.enabled) "true") (has "openai-chat-completions-v1" ($binding.profiles | default list)) (or $global $local) -}}
 {{- $selected := $binding.catalogModels | default list -}}
 {{- range $model := $binding.models | default list -}}
 {{- $selected = append $selected $model.name -}}
@@ -50,7 +52,7 @@
 {{- end -}}
 {{- if not $urls }}{{ fail "Open WebUI requires at least one explicit AgentGateway model binding" }}{{ end -}}
 {{- if gt (len $routed) 256 }}{{ fail "Open WebUI supports at most 256 model destinations" }}{{ end -}}
-{{/* The shared catalog can also contain personal, Responses-only or unselected models. */}}
+{{/* The shared catalog can also contain override-only, Responses-only or unselected models. */}}
 {{- $default := .Values.frontendOpenWebui.agentGateway.defaultModel -}}
 {{- if and $default (not (hasKey $routed $default)) }}{{ fail "default model must belong to an explicit API binding" }}{{ end -}}
 {{- dict "urls" (join ";" $urls) "keys" (join ";" $keys) "configs" $configs | toYaml -}}
