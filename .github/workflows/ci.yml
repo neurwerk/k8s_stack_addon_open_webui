@@ -61,10 +61,10 @@ jobs:
       - name: Verify installed CLI and default non-root image user offline
         run: |
           image="$(uv run --locked --project tooling python - <<'PY'
-          from pathlib import Path
-          from k8s_stack_tooling.addons import load_manifest
-          addon = load_manifest(Path("release/manifest.yaml"))
-          print(next(a.image.split("@", 1)[0] for a in addon.spec.artifacts if a.id == "tooling"))
+          import tomllib
+          with open("tooling/pyproject.toml", "rb") as project:
+              version = tomllib.load(project)["project"]["version"]
+          print(f"ghcr.io/neurwerk/k8s-stack-addon-open-webui-tooling:{version}")
           PY
           )"
           docker run --rm --network none --read-only "$image" open-webui-validate --help
