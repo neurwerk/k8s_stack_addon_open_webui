@@ -3,7 +3,7 @@ kind: AddonRelease
 metadata:
   name: open-webui
 spec:
-  version: 0.2.0
+  version: 0.2.1
   status: ready
   sourceName: open-webui-addon
   configurationKey: frontendOpenWebui
@@ -76,7 +76,7 @@ spec:
   artifacts:
     - id: tooling
       role: product
-      image: ghcr.io/neurwerk/k8s-stack-addon-open-webui-tooling:0.2.0@sha256:27f368160b7e7c3ae772badfcde92b60f7f4bc15845f4e708f6c5e2ca46cb486
+      image: ghcr.io/neurwerk/k8s-stack-addon-open-webui-tooling:0.2.1@sha256:962cab07e7002e4c64cbcdb7a617e962d729fa73678f3e84ca73f13e37123992
     - id: application
       role: native
       image: ghcr.io/open-webui/open-webui:v0.12.3@sha256:a537bbe1e6b428820f52ed4a029d7fff97062e24d5cf32c365fba36fd0542def
