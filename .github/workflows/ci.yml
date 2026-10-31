@@ -11,7 +11,7 @@ permissions:
 
 env:
   # Source/tooling-image quality uses this reviewed immutable candidate; integration tags require stable Base.
-  BASE_REF: e5eca150c0f71d3f80b135c67f2451758a8f3db1
+  BASE_REF: d2053342856a82905d5ee3f00879e0547cb22909
 
 jobs:
   validate:
