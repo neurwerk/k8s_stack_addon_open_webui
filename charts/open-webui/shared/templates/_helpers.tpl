@@ -44,7 +44,7 @@
 {{- $path := $api.path | default (printf "/bindings/%s" $binding.id) -}}
 {{- if not (regexMatch `^/[a-zA-Z0-9/_-]+$` $path) }}{{ fail "invalid AgentGateway API path" }}{{ end -}}
 {{- $url := printf "%s%s/v1" (trimSuffix "/" $.Values.frontendOpenWebui.agentGateway.origin) (trimSuffix "/" $path) -}}
-{{- $_ := set $configs (len $urls | toString) (dict "enable" true "auth_type" "system_oauth" "model_ids" $selected) -}}
+{{- $_ := set $configs (len $urls | toString) (dict "enable" true "auth_type" "system_oauth" "model_ids" $selected "headers" (dict "X-Neurwerk-Credential-Mode" (ternary "none" "global" $local))) -}}
 {{- $urls = append $urls $url -}}{{- $keys = append $keys "" -}}
 {{- end -}}
 {{- end -}}

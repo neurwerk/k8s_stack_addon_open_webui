@@ -1,5 +1,6 @@
 """Product preservation and integration with the public definition interface."""
 
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -104,6 +105,30 @@ def test_shared_chart_rejects_retired_secret_values(tmp_path: Path) -> None:
     )
     assert result.returncode != 0
     assert "frontendOpenWebuiSecrets" in result.stderr
+
+
+def test_model_modes_leave_mcp_authentication_unchanged(tmp_path: Path) -> None:
+    mcp = tmp_path / "mcp.yaml"
+    mcp.write_text(
+        "frontendOpenWebui:\n  mcp:\n    enabled: true\n    servers: [sample]\n"
+        "mcp-servers:\n  enabled: true\n  catalog:\n    custom:\n"
+        "      - {name: sample, enabled: true, contextforge: false}\n"
+    )
+    result = render(
+        ROOT / "charts/open-webui/shared", ROOT / "validation/helm-values.yaml", mcp
+    )
+    assert result.returncode == 0, result.stderr
+    config = next(
+        item for item in yaml.safe_load_all(result.stdout) if item["kind"] == "ConfigMap"
+    )
+    connections = json.loads(config["data"]["OPENAI_API_CONFIGS"])
+    models = {model: entry for entry in connections.values() for model in entry["model_ids"]}
+    assert models["local-model"]["headers"] == {"X-Neurwerk-Credential-Mode": "none"}
+    assert models["example-chat"]["headers"] == {"X-Neurwerk-Credential-Mode": "global"}
+    assert "example-personal-chat" not in models
+    servers = json.loads(config["data"]["TOOL_SERVER_CONNECTIONS"])
+    assert len(servers) == 1
+    assert servers[0]["headers"] == {"X-Session-ID": "{{CHAT_ID}}"}
 
 
 def test_actual_package_images_with_nonsecret_values_only() -> None:
