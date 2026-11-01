@@ -3,7 +3,7 @@ kind: AddonRelease
 metadata:
   name: open-webui
 spec:
-  version: 0.2.2
+  version: 0.2.3
   status: ready
   sourceName: open-webui-addon
   configurationKey: frontendOpenWebui
@@ -18,7 +18,7 @@ spec:
     - {kind: ConfigMap, namespace: frontend-open-webui, name: client-openrouter-catalog-values, owner: client}
     - {kind: ConfigMap, namespace: infra-cert-manager, name: client-values, owner: client}
   prerequisites:
-    base: 0.3.30
+    base: 0.3.31
     tooling: 0.15.8
     stackSetup: 0.8.4
     baseCharts:
