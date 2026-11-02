@@ -123,8 +123,8 @@ def test_model_modes_leave_mcp_authentication_unchanged(tmp_path: Path) -> None:
     )
     connections = json.loads(config["data"]["OPENAI_API_CONFIGS"])
     models = {model: entry for entry in connections.values() for model in entry["model_ids"]}
-    assert models["local-model"]["headers"] == {"X-Neurwerk-Credential-Mode": "none"}
-    assert models["example-chat"]["headers"] == {"X-Neurwerk-Credential-Mode": "global"}
+    assert "headers" not in models["local-model"]
+    assert "headers" not in models["example-chat"]
     assert "example-personal-chat" not in models
     servers = json.loads(config["data"]["TOOL_SERVER_CONNECTIONS"])
     assert len(servers) == 1
