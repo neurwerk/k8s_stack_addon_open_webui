@@ -3,7 +3,7 @@ kind: AddonRelease
 metadata:
   name: open-webui
 spec:
-  version: 0.2.3
+  version: 0.2.4
   status: ready
   sourceName: open-webui-addon
   configurationKey: frontendOpenWebui
@@ -18,9 +18,9 @@ spec:
     - {kind: ConfigMap, namespace: frontend-open-webui, name: client-openrouter-catalog-values, owner: client}
     - {kind: ConfigMap, namespace: infra-cert-manager, name: client-values, owner: client}
   prerequisites:
-    base: 0.3.33
-    tooling: 0.16.0
-    stackSetup: 0.8.5
+    base: 0.3.34
+    tooling: 0.18.3
+    stackSetup: 0.8.6
     baseCharts:
       - charts/postgres/addon
       - charts/keycloak/addon-access
@@ -85,10 +85,10 @@ spec:
       image: ghcr.io/documentdb/documentdb/documentdb-local:pg18-0.116.0@sha256:01bb9408393fb6417cc32735f4566dee4b53bbab6df6b70c42797317da631f12
     - id: access-provisioner
       role: shared
-      image: ghcr.io/neurwerk/k8s-stack-tooling:0.15.6@sha256:2cfe62109c8067e08a81f422733e6673ef3eb0ee11066f72e7316878a76013db
+      image: ghcr.io/neurwerk/k8s-stack-tooling:0.18.3@sha256:fa30429bb143f0176867741dcf55eae422d69157b5f033e9d007745dd3639d79
     - id: oidc-provisioner
       role: shared
-      image: ghcr.io/neurwerk/k8s-stack-tooling:0.15.6@sha256:2cfe62109c8067e08a81f422733e6673ef3eb0ee11066f72e7316878a76013db
+      image: ghcr.io/neurwerk/k8s-stack-tooling:0.18.3@sha256:fa30429bb143f0176867741dcf55eae422d69157b5f033e9d007745dd3639d79
   consumers:
     - artifact: tooling
       kind: Command
