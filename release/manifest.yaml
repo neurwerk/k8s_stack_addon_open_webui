@@ -76,7 +76,7 @@ spec:
   artifacts:
     - id: tooling
       role: product
-      image: ghcr.io/neurwerk/k8s-stack-addon-open-webui-tooling:0.2.2@sha256:7bb28233b14a70d6c415069ffe328d46dab2482a5d929930ef7500364e83c611
+      image: ghcr.io/neurwerk/k8s-stack-addon-open-webui-tooling:0.2.3@sha256:aa402f86b82dec75cd9e1dbdf2e768d0a866a8709f41398278ff2fbb213f5cb0
     - id: application
       role: native
       image: ghcr.io/open-webui/open-webui:v0.12.3@sha256:a537bbe1e6b428820f52ed4a029d7fff97062e24d5cf32c365fba36fd0542def
